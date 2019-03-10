@@ -1,0 +1,50 @@
+SUMMARY
+
+This repo contains scripts and instructions for i) simulating reassortments, ii) classifying each segment with VAPOR, and iii) classifying reassortments by inter-segment classification distances.
+
+REQUIREMENTS
+
+The following are required, and where applicable must be in your PATH:
+    Python3
+    BioPython 1.72
+    GNU Parallel 20160222
+
+For plotting, pandas 0.23.4, matplotlib 2.2.3, NumPy 1.15.2, and seaborn 0.9.0 are required.
+
+To run, this folder requires also the following data:
+
+res/: a set of used resources with the following files which can be downloaded from https://s3.climb.ac.uk/vapor-benchmark-data/vapor_benchmarking_reassortment_res_20_12_18.tar.gz
+
+USAGE:
+
+To simulate and perform simulation and classification, execute:
+
+    parallel --jobs N < code/parallel_commands/simulate_and_classify.pcom.sh > logs/simulate_and_classify.log
+
+This will result in a separate file for each run, each of which consist of a single line with 8 segment strain names, followed by a '#', followed by the 8 calls made by VAPOR. Four cases are produced; negatives (*_n_*) and positive reassortants (*_r_*), each performed for the zoonotic reassortments and the H3N2 reassortments.
+
+To collate the simulations and calls, execute:
+
+    cat results/h3n2_r_* > h3n2_r.out
+    cat results/zoo_r_* > zoo_r.out
+    cat results/h3n2_n_* > h3n2_n.out
+    cat results/zoo_n_* > zoo_n.out
+
+To assess these classifications of the H3N2 simulations by generation of a ROC curve, execute:
+
+    parallel --jobs N < code/parallel_commands/ROC.pcom.sh > logs/ROC.log
+
+Each of these ROC points will be an individual file, with three fields: param, TPR, FPR. To collate the ROC curve results, execute:
+
+    bash code/fetch_zoo_ROC.sh > zoo_ROC.csv
+    bash code/fetch_h3n2_ROC.sh > h3n2_ROC.csv
+
+Finally to plot this curve:
+    
+    python3 plotting/plot_roc.py h3n2_ROC.csv zoo_ROC.csv
+
+
+
+
+
+
